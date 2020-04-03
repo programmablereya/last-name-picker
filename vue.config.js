@@ -5,6 +5,11 @@ module.exports = {
     configureWebpack: {
         output: {
             libraryExport: 'default'
+        },
+        resolve: {
+            alias: {
+                'handlebars': 'handlebars/dist/handlebars.js'
+            }
         }
-    }
+    },
 };
