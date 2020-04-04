@@ -1,7 +1,9 @@
 <template>
     <div id="app">
         <NamesDisplay v-bind:name="name" v-bind:templates="templates"
-                     v-on:edit="update($event)" v-on:delete="remove()"/>
+                      v-on:addTemplate="addTemplate($event)"
+                      v-on:modifyTemplate="editTemplate($event)"
+                      v-on:deleteTemplate="removeTemplate($event)"/>
     </div>
 </template>
 
@@ -29,20 +31,23 @@
                 const compiled = Handlebars.compile(source);
                 this.templates.push({
                     id, source, compiled
-                })
+                });
             },
-            editTemplate(id, source) {
+            editTemplate({id, newSource}) {
                 for (let index = 0; index < this.templates.length; index += 1) {
                     if (this.templates[index].id === id) {
-                        this.templates[index].source = source;
-                        this.templates[index].compiled = Handlebars.compile(source);
+                        this.templates[index].source = newSource;
+                        this.templates[index].compiled = Handlebars.compile(newSource);
                         return;
                     }
                 }
             },
             removeTemplate(id) {
+                console.log(`Removing template ${id}`);
                 for (let index = 0; index < this.templates.length; index += 1) {
+                    console.log(`Checking template #${index} with id ${this.templates[index].id}`);
                     if (this.templates[index].id === id) {
+                        console.log(`Splicing...`);
                         this.templates.splice(index, 1);
                         return;
                     }

@@ -37,6 +37,7 @@
             },
             commitAdd(newTemplate) {
                 this.$emit("addTemplate", newTemplate);
+                this.adding = false;
             },
             cancelAdd() {
                 this.adding = false;

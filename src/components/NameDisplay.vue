@@ -45,13 +45,6 @@
                     this.enterEditMode();
                 }
             },
-            isEditing: function() {
-                if (this.isEditing === true) {
-                    this.editedTemplate = this.template;
-                } else {
-                    this.editedTemplate = null;
-                }
-            },
             templateToCompile: function() {
                 if (this.templateToCompile === null) {
                     this.compiledTemplate = null;
@@ -103,16 +96,16 @@
         },
         computed: {
             isEditing: function() {
-                return !!this.editedTemplate;
+                return this.editedTemplate !== null;
             },
             hasError: function() {
                 return !!this.compilationError;
             },
             templateIsEdited: function() {
-                return (!!this.template
-                    && this.editedTemplate !== null
-                    && this.editedTemplate !== this.template
-                    && this.editedTemplate.trim() !== "");
+                return (!this.template
+                    || (this.editedTemplate !== null
+                        && this.editedTemplate !== this.template
+                        && this.editedTemplate.trim() !== ""));
             },
             templateToCompile: function() {
                 return (this.templateIsEdited
