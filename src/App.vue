@@ -1,13 +1,12 @@
 <template>
     <div id="app">
-        {{ template }}
-        <NameDisplay v-bind:name="name" v-bind:template="template" v-bind:precompiled-template="precompiledTemplate"
+        <NamesDisplay v-bind:name="name" v-bind:templates="templates"
                      v-on:edit="update($event)" v-on:delete="remove()"/>
     </div>
 </template>
 
 <script>
-    import NameDisplay from "./components/NameDisplay";
+    import NamesDisplay from "./components/NamesDisplay";
     import Handlebars from "handlebars";
 
     export default {
@@ -19,24 +18,39 @@
                     middle: "Victoria",
                     last: "Lyndon"
                 },
-                template: "{{ first }} {{ middle }} {{ last }}",
-            }
-        },
-        computed: {
-            precompiledTemplate: function () {
-                return Handlebars.compile(this.template);
+                templates: [],
+                nextId: 0
             }
         },
         methods: {
-            update: function (newTemplate) {
-                this.template = newTemplate;
+            addTemplate(source) {
+                const id = this.nextId;
+                this.nextId += 1;
+                const compiled = Handlebars.compile(source);
+                this.templates.push({
+                    id, source, compiled
+                })
             },
-            remove: function () {
-                this.template = "(deleted)"
+            editTemplate(id, source) {
+                for (let index = 0; index < this.templates.length; index += 1) {
+                    if (this.templates[index].id === id) {
+                        this.templates[index].source = source;
+                        this.templates[index].compiled = Handlebars.compile(source);
+                        return;
+                    }
+                }
+            },
+            removeTemplate(id) {
+                for (let index = 0; index < this.templates.length; index += 1) {
+                    if (this.templates[index].id === id) {
+                        this.templates.splice(index, 1);
+                        return;
+                    }
+                }
             }
         },
         components: {
-            NameDisplay
+            NamesDisplay
         }
     }
 </script>

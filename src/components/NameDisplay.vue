@@ -1,6 +1,6 @@
 <template>
     <div>
-        <span v-bind:class="{ result: !hasError, error: hasError }">{{ text }}</span>
+        <span v-bind:class="{ result: true, error: hasError }">{{ text }}</span>
         <template v-if="!isEditing">
             <button v-on:click="beginEdit()">Edit</button>
             <button v-on:click="requestDelete()">Delete</button>
@@ -31,9 +31,27 @@
         props: {
             name: Object,
             template: String,
-            precompiledTemplate: Function
+            precompiledTemplate: Function,
+            editOnly: Boolean
+        },
+        created: function() {
+            if (this.editOnly) {
+                this.enterEditMode();
+            }
         },
         watch: {
+            editOnly: function() {
+                if (this.editOnly && !this.isEditing()) {
+                    this.enterEditMode();
+                }
+            },
+            isEditing: function() {
+                if (this.isEditing === true) {
+                    this.editedTemplate = this.template;
+                } else {
+                    this.editedTemplate = null;
+                }
+            },
             templateToCompile: function() {
                 if (this.templateToCompile === null) {
                     this.compiledTemplate = null;
@@ -53,17 +71,31 @@
             }
         },
         methods: {
+            enterEditMode: function() {
+                this.editedTemplate = this.template || "";
+                this.compiledTemplate = null;
+                this.compilationError = null;
+            },
+            exitEditMode: function() {
+                if (!this.editOnly) {
+                    this.editedTemplate = null;
+                    this.compiledTemplate = null;
+                    this.compilationError = null;
+                }
+            },
             beginEdit: function() {
-                this.editedTemplate = this.template;
+                this.$emit("beginEdit");
+                this.enterEditMode();
             },
             requestCommitEdit: function() {
                 if (this.canCompleteEdit) {
-                    this.$emit("edit", this.editedTemplate);
-                    this.cancelEdit();
+                    this.$emit("commitEdit", this.editedTemplate);
+                    this.exitEditMode();
                 }
             },
             cancelEdit: function() {
-                this.editedTemplate = null;
+                this.$emit("cancelEdit");
+                this.exitEditMode();
             },
             requestDelete: function() {
                 this.$emit("delete");
@@ -71,13 +103,14 @@
         },
         computed: {
             isEditing: function() {
-                return this.editedTemplate !== null;
+                return !!this.editedTemplate;
             },
             hasError: function() {
                 return !!this.compilationError;
             },
             templateIsEdited: function() {
-                return (this.editedTemplate !== null
+                return (!!this.template
+                    && this.editedTemplate !== null
                     && this.editedTemplate !== this.template
                     && this.editedTemplate.trim() !== "");
             },
@@ -97,6 +130,9 @@
                 }
             },
             text: function() {
+                if (!this.compiledTemplateToUse) {
+                    return "";
+                }
                 return this.compiledTemplateToUse(this.name);
             },
         }
@@ -104,5 +140,7 @@
 </script>
 
 <style scoped>
-
+    .result.error {
+        background-color: indianred;
+    }
 </style>
