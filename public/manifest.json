@@ -1,0 +1,12 @@
+{
+  "manifest_version": 2,
+  "version": "0.1-contentscripttest",
+  "name": "Last Name Picker",
+  "content_scripts": [
+    {
+      "matches": ["*://surnames.behindthename.com/name/*"],
+      "js": ["js/chunk-vendors.js", "js/contentscript.js"],
+      "run_at": "document_end"
+    }
+  ]
+}
