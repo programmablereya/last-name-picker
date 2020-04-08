@@ -3,8 +3,8 @@
         <li v-for="template in templates" v-bind:key="template.id">
             <NameDisplay v-bind:name="name" v-bind:template="template.source" v-bind:edit-only="false"
                          v-bind:precompiled-template="template.compiled"
-                         v-on:commitEdit="modify(template.id, $event)"
-                         v-on:delete="remove(template.id)"/>
+                         v-on:commitEdit="modify($event)"
+                         v-on:delete="remove(template)"/>
         </li>
         <li>
             <NameDisplay v-if="adding" v-bind:name="name" v-bind:edit-only="true"
@@ -15,7 +15,7 @@
 </template>
 
 <script>
-    import NameDisplay from "./NameDisplay";
+    import NameDisplay from "@/components/NameDisplay";
 
     export default {
         name: "NamesDisplay",
@@ -43,10 +43,10 @@
                 this.adding = false;
             },
             modify(templateId, newTemplate) {
-                this.$emit("modifyTemplate", {id: templateId, newSource: newTemplate});
+                this.$emit("modifyTemplate", newTemplate);
             },
-            remove(templateId) {
-                this.$emit("deleteTemplate", templateId);
+            remove(template) {
+                this.$emit("deleteTemplate", template);
             }
         }
     }

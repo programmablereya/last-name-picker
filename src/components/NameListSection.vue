@@ -37,7 +37,7 @@
             }
         },
         methods: {
-            addTemplate(source) {
+            addTemplate({source}) {
                 const id = this.nextId;
                 this.nextId += 1;
                 const compiled = Handlebars.compile(source);
@@ -45,21 +45,18 @@
                     id, source, compiled
                 });
             },
-            editTemplate({id, newSource}) {
+            editTemplate({id, source}) {
                 for (let index = 0; index < this.templates.length; index += 1) {
                     if (this.templates[index].id === id) {
-                        this.templates[index].source = newSource;
-                        this.templates[index].compiled = Handlebars.compile(newSource);
+                        this.templates[index].source = source;
+                        this.templates[index].compiled = Handlebars.compile(source);
                         return;
                     }
                 }
             },
-            removeTemplate(id) {
-                console.log(`Removing template ${id}`);
+            removeTemplate({id}) {
                 for (let index = 0; index < this.templates.length; index += 1) {
-                    console.log(`Checking template #${index} with id ${this.templates[index].id}`);
                     if (this.templates[index].id === id) {
-                        console.log(`Splicing...`);
                         this.templates.splice(index, 1);
                         return;
                     }

@@ -8,7 +8,7 @@
         <template v-if="isEditing">
             <label>
                 <span class="label">Template </span>
-                <input type="text" v-model="editedTemplate">
+                <input type="text" v-model="editedTemplateSource">
             </label>
             <button v-on:click="requestCommitEdit()" v-bind:disabled="!canCompleteEdit">Save</button>
             <button v-on:click="cancelEdit()">Cancel</button>
@@ -17,21 +17,20 @@
 </template>
 
 <script>
-    import Handlebars from "handlebars";
+    import HandlebarsTemplate from "@/handlebars/HandlebarsTemplate";
 
     export default {
         name: "NameDisplay",
         data: function() {
             return {
-                editedTemplate: null,
+                editedTemplateSource: null,
                 compiledTemplate: null,
                 compilationError: null
             }
         },
         props: {
             name: Object,
-            template: String,
-            precompiledTemplate: Function,
+            template: HandlebarsTemplate,
             editOnly: Boolean
         },
         created: function() {
@@ -41,7 +40,7 @@
         },
         watch: {
             editOnly: function() {
-                if (this.editOnly && !this.isEditing()) {
+                if (this.editOnly && !this.isEditing) {
                     this.enterEditMode();
                 }
             },
@@ -51,27 +50,26 @@
                     this.compilationError = null;
                     return;
                 }
-                const template = Handlebars.compile(this.templateToCompile);
                 try {
-                    template({});
-                } catch (e) {
-                    this.compilationError = e;
-                    console.log(this.compilationError);
-                    return;
+                    this.compiledTemplate = new HandlebarsTemplate({
+                        ...this.templateToCompile,
+                        compilationMode: HandlebarsTemplate.CompileMode.COMPILE_AND_CHECK_ERRORS
+                    });
+                    this.compilationError = null;
+                } catch (ex) {
+                    this.compilationError = ex;
                 }
-                this.compiledTemplate = template;
-                this.compilationError = null;
             }
         },
         methods: {
             enterEditMode: function() {
-                this.editedTemplate = this.template || "";
+                this.editedTemplateSource = this.template || "";
                 this.compiledTemplate = null;
                 this.compilationError = null;
             },
             exitEditMode: function() {
                 if (!this.editOnly) {
-                    this.editedTemplate = null;
+                    this.editedTemplateSource = null;
                     this.compiledTemplate = null;
                     this.compilationError = null;
                 }
@@ -82,7 +80,7 @@
             },
             requestCommitEdit: function() {
                 if (this.canCompleteEdit) {
-                    this.$emit("commitEdit", this.editedTemplate);
+                    this.$emit("commitEdit", this.compiledTemplate);
                     this.exitEditMode();
                 }
             },
@@ -96,20 +94,20 @@
         },
         computed: {
             isEditing: function() {
-                return this.editedTemplate !== null;
+                return this.editedTemplateSource !== null;
             },
             hasError: function() {
                 return !!this.compilationError;
             },
             templateIsEdited: function() {
                 return (!this.template
-                    || (this.editedTemplate !== null
-                        && this.editedTemplate !== this.template
-                        && this.editedTemplate.trim() !== ""));
+                    || (this.editedTemplateSource !== null
+                        && this.editedTemplateSource !== this.template.source
+                        && this.editedTemplateSource.trim() !== ""));
             },
             templateToCompile: function() {
                 return (this.templateIsEdited
-                    ? this.editedTemplate
+                    ? {id: this.template.id, source: this.editedTemplateSource}
                     : null)
             },
             canCompleteEdit: function() {
@@ -117,7 +115,7 @@
             },
             compiledTemplateToUse: function() {
                 if (this.compiledTemplate === null) {
-                    return this.precompiledTemplate;
+                    return this.template;
                 } else {
                     return this.compiledTemplate;
                 }
