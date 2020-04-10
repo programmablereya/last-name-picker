@@ -1,32 +1,34 @@
 <template>
     <ul>
         <li v-for="template in templates" v-bind:key="template.id">
-            <NameDisplay v-bind:name="name" v-bind:template="template.source" v-bind:edit-only="false"
-                         v-bind:precompiled-template="template.compiled"
-                         v-on:commitEdit="modify($event)"
-                         v-on:delete="remove(template)"/>
+            <NameListItem v-bind:name="name" v-bind:template="template"
+                          v-on:commitEdit="modify($event)"
+                          v-on:delete="remove(template)"/>
         </li>
         <li>
-            <NameDisplay v-if="adding" v-bind:name="name" v-bind:edit-only="true"
-                         v-on:cancelEdit="cancelAdd()" v-on:commitEdit="commitAdd($event)" />
-            <button v-if="!adding" v-on:click="beginAdd()">Add New</button>
+            <template v-if="!adding">
+                <button v-on:click="beginAdd()">Add New</button>
+            </template>
+            <NameListItemEdit v-if="adding" v-bind:name="name" v-on:save="commitAdd($event)" v-on:cancel="endAdd()" />
         </li>
     </ul>
 </template>
 
 <script>
-    import NameDisplay from "@/components/NameDisplay";
+    import NameListItem from "@/components/NameListItem";
+    import NameListItemEdit from "@/components/NameListItemEdit";
 
     export default {
-        name: "NamesDisplay",
+        name: "NameList",
         components: {
-            NameDisplay,
+            NameListItem,
+            NameListItemEdit,
         },
         props: {
             name: Object,
             templates: Array
         },
-        data: function() {
+        data() {
             return {
                 adding: false
             }
@@ -37,9 +39,9 @@
             },
             commitAdd(newTemplate) {
                 this.$emit("addTemplate", newTemplate);
-                this.adding = false;
+                this.endAdd();
             },
-            cancelAdd() {
+            endAdd() {
                 this.adding = false;
             },
             modify(templateId, newTemplate) {

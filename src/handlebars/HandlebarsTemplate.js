@@ -13,7 +13,9 @@ export default class HandlebarsTemplate {
                 break;
             case HandlebarsTemplate.CompileMode.COMPILE_AND_CHECK_ERRORS:
                 this.compiled = compiled;
-                // fall through
+                // This will throw if the template has syntax errors
+                compiled({});
+                break;
             case HandlebarsTemplate.CompileMode.CHECK_ERRORS_ONLY:
                 // This will throw if the template has syntax errors
                 compiled({});
@@ -40,3 +42,6 @@ HandlebarsTemplate.CompileMode = {
     // Compiles and runs the function to check for errors.
     COMPILE_AND_CHECK_ERRORS: "compile_and_check_errors"
 };
+
+HandlebarsTemplate.EMPTY = new HandlebarsTemplate({
+    id: null, source: "", compilationMode: HandlebarsTemplate.CompileMode.COMPILE_ONLY});

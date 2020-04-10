@@ -9,30 +9,31 @@
             <h2>Name Previews</h2>
         </div>
         <div>
-            <NamesDisplay v-bind:name="name" v-bind:templates="templates"
-                          v-on:addTemplate="addTemplate($event)"
-                          v-on:modifyTemplate="editTemplate($event)"
-                          v-on:deleteTemplate="removeTemplate($event)"/>
+            <NameList v-bind:name="name" v-bind:templates="templates"
+                      v-on:addTemplate="addTemplate($event)"
+                      v-on:modifyTemplate="editTemplate($event)"
+                      v-on:deleteTemplate="removeTemplate($event)"/>
         </div>
     </section>
 </template>
 
 <script>
-    import NamesDisplay from "@/components/NamesDisplay";
+    import NameList from "@/components/NameList";
     import Handlebars from "handlebars";
+    import HandlebarsTemplate from "@/handlebars/HandlebarsTemplate";
     export default {
         name: "NameListSection",
         props: {
             lastName: String
         },
-        data: function () {
+        data() {
             return {
                 name: {
                     first: "Marissa",
                     middle: "Victoria",
                     last: this.lastName
                 },
-                templates: [],
+                templates: [new HandlebarsTemplate({id: -1, source: "{{ first }} {{ middle }} {{ last }}", compilationMode: HandlebarsTemplate.CompileMode.COMPILE_ONLY })],
                 nextId: 0
             }
         },
@@ -63,7 +64,7 @@
                 }
             }
         },
-        components: {NamesDisplay}
+        components: {NameList}
     }
 </script>
 
